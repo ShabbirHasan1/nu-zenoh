@@ -44,6 +44,7 @@ impl engine::Command for Get {
             .required("keyexpr", SyntaxShape::String, "Key expression")
             .target()
             .consolidation()
+            .congestion_control()
             .named("timeout", SyntaxShape::Duration, "Query timeout", None)
             .named("payload", SyntaxShape::String, "Query payload", None)
             .named("encoding", SyntaxShape::String, "Query encoding", None)
@@ -81,6 +82,10 @@ impl engine::Command for Get {
 
                 if let Some(consolidation) = call.consolidation(engine_state, stack)? {
                     get = get.consolidation(consolidation);
+                }
+
+                if let Some(congestion_control) = call.congestion_control(engine_state, stack)? {
+                    get = get.congestion_control(congestion_control);
                 }
 
                 if let Some(timeout) = call.timeout(engine_state, stack)? {
