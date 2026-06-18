@@ -69,6 +69,10 @@ pub fn add_zenoh_context(mut engine_state: EngineState, options: Config) -> Engi
 
             working_set.add_decl(Box::new(cmd::decode::transport_msg::TransportMsg));
             working_set.add_decl(Box::new(cmd::decode::scouting_msg::ScoutingMsg));
+
+            working_set.add_decl(Box::new(cmd::parse::Locator));
+            working_set.add_decl(Box::new(cmd::parse::Endpoint));
+            working_set.add_decl(Box::new(cmd::parse::Selector));
         }
 
         working_set.add_decl(Box::new(cmd::put::Put::new(state.clone())));

@@ -19,6 +19,7 @@ pub(crate) mod info;
 pub(crate) mod keyexpr;
 pub(crate) mod liveliness;
 pub(crate) mod log_path;
+pub(crate) mod parse;
 pub(crate) mod pub_;
 pub(crate) mod put;
 pub(crate) mod querier;
