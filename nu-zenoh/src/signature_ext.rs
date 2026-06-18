@@ -20,7 +20,7 @@ pub(crate) trait SignatureExt: Sized {
 
     fn zenoh_category(self) -> Self;
 
-    fn publication(self) -> Self;
+    fn publication(self, experimental_options: bool) -> Self;
 
     fn allowed_destination(self) -> Self;
 
@@ -32,7 +32,7 @@ pub(crate) trait SignatureExt: Sized {
 
     fn keyexpr(self) -> Self;
 
-    fn congestion_control(self) -> Self;
+    fn congestion_control(self, experimental_options: bool) -> Self;
 
     fn express(self) -> Self;
 
@@ -87,13 +87,14 @@ impl SignatureExt for Signature {
         )
     }
 
-    fn congestion_control(self) -> Self {
-        self.named(
-            "congestion-control",
-            SyntaxShape::Int,
-            "Congestion control (0 for DROP, 1 for BLOCK)",
-            None,
-        )
+    fn congestion_control(self, experimental_options: bool) -> Self {
+        let description = if experimental_options {
+            "Congestion control (either 'drop', 'block', or unstable 'block-first')"
+        } else {
+            "Congestion control (either 'drop' or 'block')"
+        };
+
+        self.named("congestion-control", SyntaxShape::String, description, None)
     }
 
     fn reliable(self) -> Self {
@@ -118,10 +119,10 @@ impl SignatureExt for Signature {
         self.named("priority", SyntaxShape::String, "Priority (0-7)", None)
     }
 
-    fn publication(self) -> Self {
+    fn publication(self, experimental_options: bool) -> Self {
         self.keyexpr()
             .allowed_destination()
-            .congestion_control()
+            .congestion_control(experimental_options)
             .reliable()
             .express()
             .priority()

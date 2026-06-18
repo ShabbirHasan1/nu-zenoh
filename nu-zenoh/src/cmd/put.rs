@@ -40,7 +40,7 @@ impl Command for Put {
         Signature::build(self.name())
             .session()
             .zenoh_category()
-            .publication()
+            .publication(self.state.options.experimental_options)
             .encoding()
             .required(
                 "payload",
@@ -75,7 +75,11 @@ impl Command for Put {
                     put = put.priority(priority);
                 }
 
-                if let Some(congestion_control) = call.congestion_control(engine_state, stack)? {
+                if let Some(congestion_control) = call.congestion_control(
+                    engine_state,
+                    stack,
+                    self.state.options.experimental_options,
+                )? {
                     put = put.congestion_control(congestion_control);
                 }
 

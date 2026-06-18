@@ -40,7 +40,7 @@ impl Command for Delete {
         Signature::build(Command::name(self))
             .session()
             .zenoh_category()
-            .publication()
+            .publication(self.state.options.experimental_options)
     }
 
     fn description(&self) -> &str {
@@ -62,7 +62,11 @@ impl Command for Delete {
                     delete = delete.priority(priority);
                 }
 
-                if let Some(congestion_control) = call.congestion_control(engine_state, stack)? {
+                if let Some(congestion_control) = call.congestion_control(
+                    engine_state,
+                    stack,
+                    self.state.options.experimental_options,
+                )? {
                     delete = delete.congestion_control(congestion_control);
                 }
 

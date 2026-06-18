@@ -45,7 +45,7 @@ impl Command for Pub {
             .zenoh_category()
             .keyexpr()
             .allowed_destination()
-            .congestion_control()
+            .congestion_control(self.state.options.experimental_options)
             .reliable()
             .express()
             .priority()
@@ -79,7 +79,11 @@ impl Command for Pub {
                     pub_ = pub_.priority(priority);
                 }
 
-                if let Some(congestion_control) = call.congestion_control(engine_state, stack)? {
+                if let Some(congestion_control) = call.congestion_control(
+                    engine_state,
+                    stack,
+                    self.state.options.experimental_options,
+                )? {
                     pub_ = pub_.congestion_control(congestion_control);
                 }
 

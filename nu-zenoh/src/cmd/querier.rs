@@ -49,7 +49,7 @@ impl Command for Querier {
             .zenoh_category()
             .keyexpr()
             .allowed_destination()
-            .congestion_control()
+            .congestion_control(self.state.options.experimental_options)
             .express()
             .priority()
             .target()
@@ -81,7 +81,11 @@ impl Command for Querier {
                     querier = querier.priority(priority);
                 }
 
-                if let Some(congestion_control) = call.congestion_control(engine_state, stack)? {
+                if let Some(congestion_control) = call.congestion_control(
+                    engine_state,
+                    stack,
+                    self.state.options.experimental_options,
+                )? {
                     querier = querier.congestion_control(congestion_control);
                 }
 

@@ -69,6 +69,7 @@ pub(crate) trait CallExt2 {
         &self,
         engine_state: &EngineState,
         stack: &mut Stack,
+        experimental_options: bool,
     ) -> Result<Option<CongestionControl>, LabeledError>;
 
     fn timestamp(
@@ -213,22 +214,36 @@ impl CallExt2 for Call<'_> {
         &self,
         engine_state: &EngineState,
         stack: &mut Stack,
+        experimental_options: bool,
     ) -> Result<Option<CongestionControl>, LabeledError> {
         /// Helper function to parse congestion control values
         fn parse_congestion_control(
-            cc_val: i64,
+            cc_str: &str,
             span: nu_protocol::Span,
+            experimental_options: bool,
         ) -> Result<CongestionControl, nu_protocol::LabeledError> {
-            match cc_val {
-                0 => Ok(CongestionControl::Drop),
-                1 => Ok(CongestionControl::Block),
-                _ => Err(nu_protocol::LabeledError::new("Invalid congestion control")
-                    .with_label("Must be 0 (drop) or 1 (block)", span)),
+            match cc_str {
+                "drop" => Ok(CongestionControl::Drop),
+                "block" => Ok(CongestionControl::Block),
+                "block-first" if experimental_options => Ok(CongestionControl::BlockFirst),
+                "block-first" => Err(nu_protocol::LabeledError::new(
+                    "'block-first' requires -X/--experimental-options",
+                )
+                .with_label("unstable congestion control", span)),
+                _ => {
+                    let expected = if experimental_options {
+                        "Must be 'drop', 'block', or 'block-first'"
+                    } else {
+                        "Must be 'drop' or 'block'"
+                    };
+                    Err(nu_protocol::LabeledError::new("Invalid congestion control")
+                        .with_label(expected, span))
+                }
             }
         }
 
-        self.get_flag::<i64>(engine_state, stack, "congestion-control")?
-            .map(|c| parse_congestion_control(c, self.head))
+        self.get_flag::<String>(engine_state, stack, "congestion-control")?
+            .map(|c| parse_congestion_control(&c, self.head, experimental_options))
             .transpose()
     }
 
