@@ -20,7 +20,7 @@ use std::{
 use clap::Parser;
 use nu_protocol::{
     engine::{EngineState, Stack},
-    BannerKind, Config, PipelineData, Signals, Span, Value,
+    BannerKind, Config, HistoryPath, PipelineData, Signals, Span, Value,
 };
 
 mod args;
@@ -28,6 +28,11 @@ mod args;
 fn main() {
     let entire_start_time = Instant::now();
     let args = args::Args::parse();
+
+    if args.print_history_path {
+        println!("{}", history_path().display());
+        return;
+    }
 
     let include_paths = args
         .include_path
@@ -110,10 +115,12 @@ fn main() {
 }
 
 fn nu_context(options: nu_zenoh::Config) -> (EngineState, Stack) {
-    let config = Config {
+    let mut config = Config {
         show_banner: BannerKind::None,
         ..Default::default()
     };
+
+    config.history.path = HistoryPath::Custom(history_path());
 
     let stack = Stack::new();
 
@@ -158,6 +165,13 @@ fn nu_context(options: nu_zenoh::Config) -> (EngineState, Stack) {
     );
 
     (engine_state, stack)
+}
+
+fn history_path() -> std::path::PathBuf {
+    let mut path = dirs::config_local_dir().expect("could not get local config directory");
+    path.push("nuze");
+    path.push("history.txt");
+    path
 }
 
 /// Prevents the REPL from existing on Ctrl-C

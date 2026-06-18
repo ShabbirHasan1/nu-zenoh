@@ -12,6 +12,7 @@ version.workspace = true
 [dependencies]
 clap = { workspace = true, features = ["derive"] }
 ctrlc = { workspace = true }
+dirs = { workspace = true }
 nu-cli = { workspace = true }
 nu-cmd-extra = { workspace = true }
 nu-cmd-lang = { workspace = true }

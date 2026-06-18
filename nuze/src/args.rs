@@ -60,4 +60,10 @@ pub(crate) struct Args {
         help = "Comma-delimited list of module include paths"
     )]
     pub include_path: Option<String>,
+
+    #[arg(
+        long = "print-history-path",
+        help = "Print the REPL history file path and exit"
+    )]
+    pub print_history_path: bool,
 }
