@@ -23,6 +23,7 @@ $env.PROMPT_COMMAND = {||
 $env.PROMPT_INDICATOR = $"(ansi light_blue_bold)> (ansi reset)"
 
 alias 'zenoh open' = zenoh session open
+alias 'zenoh close' = zenoh session close
 
 # Various commands to interact with Zenoh systems.
 #
