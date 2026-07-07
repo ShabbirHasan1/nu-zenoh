@@ -50,7 +50,7 @@ impl SignatureExt for Signature {
         const ZENOH_VERSION: &str = "1.9.0";
         self.optional(
             "config",
-            SyntaxShape::Record(vec![]),
+            SyntaxShape::Record(vec![].into()),
             format!("Zenoh configuration object; see https://raw.githubusercontent.com/eclipse-zenoh/zenoh/refs/tags/{ZENOH_VERSION}/DEFAULT_CONFIG.json5"),
         )
     }

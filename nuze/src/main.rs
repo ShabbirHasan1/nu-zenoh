@@ -142,19 +142,6 @@ fn nu_context(options: nu_zenoh::Config) -> (EngineState, Stack) {
     engine_state = nu_cli::add_cli_context(engine_state);
     engine_state = nu_explore::add_explore_context(engine_state);
     engine_state = nu_zenoh::add_zenoh_context(engine_state, options);
-    {
-        let delta = {
-            let mut working_set = nu_protocol::engine::StateWorkingSet::new(&engine_state);
-            working_set.add_decl(Box::new(nu_cli::NuHighlight));
-            working_set.add_decl(Box::new(nu_cli::Print));
-            working_set.render()
-        };
-
-        if let Err(err) = engine_state.merge_delta(delta) {
-            eprintln!("failed to load print and nu-hightlight: {err}");
-        }
-    };
-
     if let Err(err) = nu_std::load_standard_library(&mut engine_state) {
         eprintln!("failed to load the standard library: {err}");
     }

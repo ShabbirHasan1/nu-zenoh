@@ -59,7 +59,7 @@ impl Command for Open {
             )
             .optional(
                 "config",
-                SyntaxShape::Record(vec![]),
+                SyntaxShape::Record(vec![].into()),
                 "Zenoh configuration object (see https://github.com/eclipse-zenoh/zenoh/blob/main/DEFAULT_CONFIG.json5)",
             )
     }

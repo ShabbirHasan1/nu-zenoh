@@ -40,7 +40,7 @@ impl Command for UndeclareToken {
         Signature::build(self.name())
             .session()
             .zenoh_category()
-            .input_output_type(Type::Nothing, Type::list(Type::record()))
+            .input_output_type(Type::Nothing, Type::Nothing)
             .required("token", SyntaxShape::Any, "liveliness token")
             .allowed_origin()
     }

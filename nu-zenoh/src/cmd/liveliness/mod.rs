@@ -28,13 +28,17 @@ struct LivelinessTokenValue {
     keyexpr: OwnedKeyExpr,
 }
 
+impl LivelinessTokenValue {
+    pub(crate) const TYPE_NAME: &'static str = "liveliness-token";
+}
+
 impl CustomValue for LivelinessTokenValue {
     fn clone_value(&self, span: Span) -> Value {
         Value::custom(Box::new(self.clone()), span)
     }
 
     fn type_name(&self) -> String {
-        self.keyexpr.to_string()
+        Self::TYPE_NAME.to_string()
     }
 
     fn to_base_value(&self, span: Span) -> Result<Value, ShellError> {

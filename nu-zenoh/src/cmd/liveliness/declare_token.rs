@@ -47,7 +47,7 @@ impl Command for DeclareToken {
         Signature::build(self.name())
             .session()
             .zenoh_category()
-            .input_output_type(Type::Nothing, Type::list(Type::record()))
+            .input_output_type(Type::Nothing, Type::custom(LivelinessTokenValue::TYPE_NAME))
             .required("keyexpr", SyntaxShape::String, "key-expression")
             .allowed_origin()
     }
