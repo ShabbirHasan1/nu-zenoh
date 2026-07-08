@@ -51,3 +51,12 @@ To get help on a specific command:
 ```console
 41aa8953> help zenoh liveliness declare-token
 ```
+
+## Version matrix
+
+| Nuze version | Nushell version | Zenoh version |
+| ------------ | --------------- | ------------- |
+| v0.1.0       | 0.106.1         | 1.6.2         |
+| v0.2.0       | 0.106.1         | 1.7.1         |
+| v0.3.0       | 0.112.1         | 1.9.0         |
+| v0.4.0       | 0.114.0         | 1.9.0         |
