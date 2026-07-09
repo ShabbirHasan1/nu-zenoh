@@ -46,6 +46,7 @@ fn main() {
         no_default_session: args.no_default_session,
         include_paths,
     };
+    let experimental_options = options.experimental_options;
 
     let (mut engine_state, mut stack) = nu_context(options);
     ctrlc_protection(&mut engine_state);
@@ -58,6 +59,17 @@ fn main() {
         PipelineData::Empty,
         false,
     );
+
+    if experimental_options {
+        nu_cli::eval_source(
+            &mut engine_state,
+            &mut stack,
+            nu_zenoh::ZENOH_CONTEXT_EXPERIMENTAL_EXTRAS,
+            "<zenoh-context-experimental-extras>",
+            PipelineData::Empty,
+            false,
+        );
+    }
 
     // NOTE: script, commands and execute are mutually exclusive
 

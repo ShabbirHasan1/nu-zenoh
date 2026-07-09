@@ -13,58 +13,58 @@
 #   ZettaScale Zenoh Team, <zenoh@zettascale.tech>
 #
 
-$env.PROMPT_COMMAND = {||
-    if (zenoh session list | where name == 'default' | is-not-empty) {
-        $"(ansi light_blue_bold)(zenoh zid --short)(ansi reset)"
-    } else {
-        $"(ansi light_blue_bold)nuze(ansi reset)"
-    }
-}
-$env.PROMPT_INDICATOR = $"(ansi light_blue_bold)> (ansi reset)"
-
-alias 'zenoh open' = zenoh session open
-alias 'zenoh close' = zenoh session close
-alias 'z open' = z session open
-alias 'z close' = z session close
-
-# Various commands to interact with Zenoh systems.
+# Commands to interact with Zenoh liveliness.
 #
 # You must use one of the following subcommands. Using this command as-is will only produce this help message.
-export def "zenoh" [] {
-    help zenoh
+export def "zenoh liveliness" [] {
+    help zenoh liveliness
 }
 
-# Commands to manage Zenoh sessions.
+# Commands to manage Zenoh runtimes.
 #
 # You must use one of the following subcommands. Using this command as-is will only produce this help message.
-export def "zenoh session" [] {
-    help zenoh session
+export def "zenoh runtime" [] {
+    help zenoh runtime
 }
 
-# Commands to work with Zenoh key expressions.
+# Commands to decode Zenoh protocol messages.
 #
 # You must use one of the following subcommands. Using this command as-is will only produce this help message.
-export def "zenoh keyexpr" [] {
-    help zenoh keyexpr
+export def "zenoh decode" [] {
+    help zenoh decode
 }
 
-# Short form of `zenoh`.
+# Commands to parse Zenoh protocol values.
 #
 # You must use one of the following subcommands. Using this command as-is will only produce this help message.
-export def "z" [] {
-    help z
+export def "zenoh parse" [] {
+    help zenoh parse
 }
 
-# Short form of `zenoh session`.
+# Short form of `zenoh liveliness`.
 #
 # You must use one of the following subcommands. Using this command as-is will only produce this help message.
-export def "z session" [] {
-    help z session
+export def "z liveliness" [] {
+    help z liveliness
 }
 
-# Short form of `zenoh keyexpr`.
+# Short form of `zenoh runtime`.
 #
 # You must use one of the following subcommands. Using this command as-is will only produce this help message.
-export def "z keyexpr" [] {
-    help z keyexpr
+export def "z runtime" [] {
+    help z runtime
+}
+
+# Short form of `zenoh decode`.
+#
+# You must use one of the following subcommands. Using this command as-is will only produce this help message.
+export def "z decode" [] {
+    help z decode
+}
+
+# Short form of `zenoh parse`.
+#
+# You must use one of the following subcommands. Using this command as-is will only produce this help message.
+export def "z parse" [] {
+    help z parse
 }

@@ -40,6 +40,11 @@ pub struct Config {
 /// This should be called after [`crate::add_zenoh_context`].
 pub const ZENOH_CONTEXT_EXTRAS: &[u8] = include_bytes!("nu/extras.nu");
 
+/// Adds extra context for experimental commands and command options as Nu source code.
+///
+/// This should be called after [`crate::add_zenoh_context`] when experimental options are enabled.
+pub const ZENOH_CONTEXT_EXPERIMENTAL_EXTRAS: &[u8] = include_bytes!("nu/experimental/extras.nu");
+
 /// Adds all `zenoh *` commands to the given [`nu_protocol::engine::EngineState`].
 pub fn add_zenoh_context(mut engine_state: EngineState, options: Config) -> EngineState {
     let delta = {
