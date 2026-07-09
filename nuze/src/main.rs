@@ -134,7 +134,7 @@ fn nu_context(options: nu_zenoh::Config) -> (EngineState, Stack) {
 
     config.history.path = HistoryPath::Custom(history_path());
 
-    let stack = Stack::new();
+    let mut stack = Stack::new();
 
     let mut engine_state = nu_cmd_lang::create_default_context();
     engine_state.add_env_var(
@@ -153,7 +153,8 @@ fn nu_context(options: nu_zenoh::Config) -> (EngineState, Stack) {
     engine_state = nu_cmd_extra::add_extra_command_context(engine_state);
     engine_state = nu_cli::add_cli_context(engine_state);
     engine_state = nu_explore::add_explore_context(engine_state);
-    engine_state = nu_zenoh::add_zenoh_context(engine_state, options);
+    engine_state = nu_zenoh::add_zenoh_context(engine_state, options.clone());
+    nu_zenoh::add_nuze_constant(&mut engine_state, &mut stack, &options);
     if let Err(err) = nu_std::load_standard_library(&mut engine_state) {
         eprintln!("failed to load the standard library: {err}");
     }

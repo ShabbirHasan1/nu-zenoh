@@ -18,7 +18,7 @@ use std::{
 
 use nu_protocol::{
     engine::{Call, Command, EngineState, Stack, StateWorkingSet},
-    Example, LabeledError, PipelineData, ShellError, Signature,
+    record, Example, LabeledError, PipelineData, ShellError, Signature, Span, Type, Value,
 };
 use zenoh::{internal::runtime::Runtime, Session, Wait};
 
@@ -113,6 +113,39 @@ pub fn add_zenoh_context(mut engine_state: EngineState, options: Config) -> Engi
     }
 
     engine_state
+}
+
+/// Adds the `$nuze` constant to the given engine state and stack.
+pub fn add_nuze_constant(engine_state: &mut EngineState, stack: &mut Stack, options: &Config) {
+    let span = Span::unknown();
+    let zenoh_features = zenoh::FEATURES
+        .split_whitespace()
+        .map(|feature| Value::string(feature, span))
+        .collect();
+    let value = Value::record(
+        record!(
+            "zenoh-git-version" => Value::string(zenoh::GIT_VERSION, span),
+            "zenoh-features" => Value::list(zenoh_features, span),
+            "experimental-options-enabled" => Value::bool(options.experimental_options, span),
+        ),
+        span,
+    );
+
+    let var_id = {
+        let mut working_set = StateWorkingSet::new(engine_state);
+        let var_id = working_set.add_variable(b"nuze".to_vec(), span, Type::record(), false);
+        working_set.set_variable_const_val(var_id, value.clone());
+        let delta = working_set.render();
+
+        if let Err(err) = engine_state.merge_delta(delta) {
+            eprintln!("Error creating Nuze constant: {err:?}");
+            return;
+        }
+
+        var_id
+    };
+
+    stack.add_var(var_id, value);
 }
 
 type CommandFactory = fn(&State) -> Box<dyn Command>;
