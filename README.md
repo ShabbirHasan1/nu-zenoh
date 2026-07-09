@@ -46,6 +46,13 @@ To get the list of available commands:
 41aa8953> help zenoh
 ```
 
+All `zenoh ...` commands are also available under the shorter `z ...` prefix:
+
+```console
+41aa8953> z session list
+41aa8953> z zid --short
+```
+
 To get help on a specific command:
 
 ```console

@@ -24,10 +24,19 @@ $env.PROMPT_INDICATOR = $"(ansi light_blue_bold)> (ansi reset)"
 
 alias 'zenoh open' = zenoh session open
 alias 'zenoh close' = zenoh session close
+alias 'z open' = z session open
+alias 'z close' = z session close
 
 # Various commands to interact with Zenoh systems.
 #
 # You must use one of the following subcommands. Using this command as-is will only produce this help message.
 export def "zenoh" [] {
     help zenoh
+}
+
+# Short form of `zenoh`.
+#
+# You must use one of the following subcommands. Using this command as-is will only produce this help message.
+export def "z" [] {
+    help z
 }

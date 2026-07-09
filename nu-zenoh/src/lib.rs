@@ -17,8 +17,8 @@ use std::{
 };
 
 use nu_protocol::{
-    engine::{EngineState, StateWorkingSet},
-    LabeledError,
+    engine::{Call, Command, EngineState, Stack, StateWorkingSet},
+    Example, LabeledError, PipelineData, ShellError, Signature,
 };
 use zenoh::{internal::runtime::Runtime, Session, Wait};
 
@@ -48,51 +48,57 @@ pub fn add_zenoh_context(mut engine_state: EngineState, options: Config) -> Engi
         let state = State::new(options.clone());
 
         if options.experimental_options {
-            working_set.add_decl(Box::new(cmd::runtime::list::List::new(state.clone())));
-            working_set.add_decl(Box::new(cmd::runtime::open::Open::new(state.clone())));
-            working_set.add_decl(Box::new(cmd::runtime::close::Close::new(state.clone())));
-
-            working_set.add_decl(Box::new(cmd::pub_::Pub::new(state.clone())));
-            working_set.add_decl(Box::new(cmd::querier::Querier::new(state.clone())));
-
-            working_set.add_decl(Box::new(cmd::liveliness::declare_token::DeclareToken::new(
-                state.clone(),
-            )));
-            working_set.add_decl(Box::new(
-                cmd::liveliness::undeclare_token::UndeclareToken::new(state.clone()),
-            ));
-            working_set.add_decl(Box::new(cmd::liveliness::get::Get::new(state.clone())));
-            working_set.add_decl(Box::new(cmd::liveliness::sub::Sub::new(state.clone())));
-
-            working_set.add_decl(Box::new(cmd::pub_::MatchingListener::new(state.clone())));
-            working_set.add_decl(Box::new(cmd::querier::MatchingListener::new(state.clone())));
-
-            working_set.add_decl(Box::new(cmd::decode::transport_msg::TransportMsg));
-            working_set.add_decl(Box::new(cmd::decode::scouting_msg::ScoutingMsg));
-
-            working_set.add_decl(Box::new(cmd::parse::Locator));
-            working_set.add_decl(Box::new(cmd::parse::Endpoint));
-            working_set.add_decl(Box::new(cmd::parse::Selector));
+            let xcmds: &[CommandFactory] = &[
+                |st| Box::new(cmd::runtime::list::List::new(st.clone())),
+                |st| Box::new(cmd::runtime::open::Open::new(st.clone())),
+                |st| Box::new(cmd::runtime::close::Close::new(st.clone())),
+                |st| Box::new(cmd::pub_::Pub::new(st.clone())),
+                |st| Box::new(cmd::querier::Querier::new(st.clone())),
+                |st| {
+                    Box::new(cmd::liveliness::declare_token::DeclareToken::new(
+                        st.clone(),
+                    ))
+                },
+                |st| {
+                    Box::new(cmd::liveliness::undeclare_token::UndeclareToken::new(
+                        st.clone(),
+                    ))
+                },
+                |st| Box::new(cmd::liveliness::get::Get::new(st.clone())),
+                |st| Box::new(cmd::liveliness::sub::Sub::new(st.clone())),
+                |st| Box::new(cmd::pub_::MatchingListener::new(st.clone())),
+                |st| Box::new(cmd::querier::MatchingListener::new(st.clone())),
+                |_| Box::new(cmd::decode::transport_msg::TransportMsg),
+                |_| Box::new(cmd::decode::scouting_msg::ScoutingMsg),
+                |_| Box::new(cmd::parse::Locator),
+                |_| Box::new(cmd::parse::Endpoint),
+                |_| Box::new(cmd::parse::Selector),
+            ];
+            for cmd in xcmds {
+                add_decl_with_short_mirror(&mut working_set, cmd(&state));
+            }
         }
 
-        working_set.add_decl(Box::new(cmd::put::Put::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::delete::Delete::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::get::Get::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::sub::Sub::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::zid::Zid::new(state.clone())));
-
-        working_set.add_decl(Box::new(cmd::session::list::List::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::session::open::Open::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::session::close::Close::new(state.clone())));
-
-        working_set.add_decl(Box::new(cmd::log_path::LogPath::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::queryable::Queryable::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::scout::Scout::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::info::Info::new(state.clone())));
-        working_set.add_decl(Box::new(cmd::config::Config::new(state)));
-
-        working_set.add_decl(Box::new(cmd::keyexpr::Includes));
-        working_set.add_decl(Box::new(cmd::keyexpr::Intersects));
+        let cmds: &[CommandFactory] = &[
+            |st| Box::new(cmd::put::Put::new(st.clone())),
+            |st| Box::new(cmd::delete::Delete::new(st.clone())),
+            |st| Box::new(cmd::get::Get::new(st.clone())),
+            |st| Box::new(cmd::sub::Sub::new(st.clone())),
+            |st| Box::new(cmd::zid::Zid::new(st.clone())),
+            |st| Box::new(cmd::session::list::List::new(st.clone())),
+            |st| Box::new(cmd::session::open::Open::new(st.clone())),
+            |st| Box::new(cmd::session::close::Close::new(st.clone())),
+            |st| Box::new(cmd::log_path::LogPath::new(st.clone())),
+            |st| Box::new(cmd::queryable::Queryable::new(st.clone())),
+            |st| Box::new(cmd::scout::Scout::new(st.clone())),
+            |st| Box::new(cmd::info::Info::new(st.clone())),
+            |st| Box::new(cmd::config::Config::new(st.clone())),
+            |_| Box::new(cmd::keyexpr::Includes),
+            |_| Box::new(cmd::keyexpr::Intersects),
+        ];
+        for cmd in cmds {
+            add_decl_with_short_mirror(&mut working_set, cmd(&state));
+        }
 
         working_set.render()
     };
@@ -102,6 +108,73 @@ pub fn add_zenoh_context(mut engine_state: EngineState, options: Config) -> Engi
     }
 
     engine_state
+}
+
+type CommandFactory = fn(&State) -> Box<dyn Command>;
+
+fn add_decl_with_short_mirror(working_set: &mut StateWorkingSet<'_>, command: Box<dyn Command>) {
+    let short_name = command
+        .name()
+        .strip_prefix("zenoh ")
+        .map(|suffix| format!("z {suffix}"))
+        .expect("commands registered with a short mirror must start with `zenoh `");
+
+    working_set.add_decl(command.clone());
+    working_set.add_decl(Box::new(ShortZenohCommand::new(short_name, command)));
+}
+
+/// Built-in `z ...` mirror for a `zenoh ...` command.
+///
+/// Nu aliases don't participate in subcommand completion as well as real
+/// declarations do, so this wrapper registers short command names directly.
+#[derive(Clone)]
+struct ShortZenohCommand {
+    name: String,
+    command: Box<dyn Command>,
+}
+
+impl ShortZenohCommand {
+    fn new(name: String, command: Box<dyn Command>) -> Self {
+        Self { name, command }
+    }
+}
+
+impl Command for ShortZenohCommand {
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn signature(&self) -> Signature {
+        let mut signature = self.command.signature();
+        signature.name = self.name.clone();
+        signature
+    }
+
+    fn description(&self) -> &str {
+        self.command.description()
+    }
+
+    fn extra_description(&self) -> &str {
+        self.command.extra_description()
+    }
+
+    fn run(
+        &self,
+        engine_state: &EngineState,
+        stack: &mut Stack,
+        call: &Call,
+        input: PipelineData,
+    ) -> Result<PipelineData, ShellError> {
+        self.command.run(engine_state, stack, call, input)
+    }
+
+    fn examples(&self) -> Vec<Example<'_>> {
+        self.command.examples()
+    }
+
+    fn search_terms(&self) -> Vec<&str> {
+        self.command.search_terms()
+    }
 }
 
 #[derive(Clone)]
